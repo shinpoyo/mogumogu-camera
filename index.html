@@ -81,11 +81,11 @@
     display:flex;align-items:flex-end;gap:8px;pointer-events:none;
   }
   #gauge{
-    width:16px;height:112px;padding:2px;border-radius:999px;
+    width:26px;height:112px;padding:3px;border-radius:999px;
     background:rgba(22,32,43,.72);border:1px solid rgba(255,246,230,.22);
     display:flex;flex-direction:column-reverse;gap:2px;backdrop-filter:blur(6px);
   }
-  #gauge .seg{flex:1;min-height:3px;border-radius:4px;background:rgba(255,246,230,.12);transition:background .3s ease, box-shadow .3s ease}
+  #gauge .seg{flex:1;min-height:4px;border-radius:6px;background:rgba(255,246,230,.12);transition:background .3s ease, box-shadow .3s ease}
   #gauge .seg.on{background:linear-gradient(180deg,var(--ume),var(--tamago));box-shadow:0 0 8px rgba(255,197,61,.8)}
   #ship{display:flex;flex-direction:column;align-items:center;transform-origin:50% 100%;transition:opacity .3s ease}
   #ship.gone{opacity:0}
@@ -313,7 +313,7 @@
     </div>
     <div class="row"><label for="snd">おと</label><input id="snd" type="checkbox" checked></div>
     <div class="row"><label for="voice">ほめる こえ</label><input id="voice" type="checkbox" checked></div>
-    <div class="row"><label for="rocketChk">ロケット</label><input id="rocketChk" type="checkbox" checked></div>
+    <div class="row"><label for="rocketChk">ロケット（オフは おべんとう）</label><input id="rocketChk" type="checkbox" checked></div>
     <div class="row">
       <button id="manualBtn" class="primary">いま たべた！</button>
       <button id="resetBtn" class="ghost">さいしょから</button>
@@ -324,7 +324,7 @@
   <div id="start">
     <div>
       <h1>もぐもぐカメラ</h1>
-      <p>カメラに うつった おくちが うごくと<br>おべんとうと ロケットの ねんりょうが<br>ひとつずつ たまります。<br>ぜんぶ たべたら はっしゃ！</p>
+      <p>カメラに うつった おくちが うごくと<br>ロケットの ねんりょうが たまります。<br>まんタンに なったら はっしゃ！</p>
       <button id="startBtn" class="primary big">カメラを つける</button>
       <div id="err" role="status"></div>
     </div>
@@ -402,10 +402,12 @@
     goalInput.value=goal; goalVal.textContent=goal;
     layoutDeck();
   }
-  // 弁当箱の 高さを 実測して、ボタン・ロケット・パネルの 足元を そろえる
+  // 弁当箱の 高さを 実測して、ボタン・ロケット・パネルの 足元を そろえる。
+  // 弁当箱を 出していない ときは 画面の 下ぎりぎりまで さげる
   function layoutDeck(){
-    const h=bento.getBoundingClientRect().height;
-    if(h>0) document.documentElement.style.setProperty("--deck", Math.round(h+26)+"px");
+    const shown=!bento.classList.contains("hidden");
+    const h=shown? bento.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty("--deck", Math.round(h>0? h+26 : 24)+"px");
   }
   function paintCells(){
     cells.forEach((c,i)=>{
@@ -418,7 +420,7 @@
     if(next===goal){ goalVal.textContent=goal; return; }
     goal=next;
     filled=Math.min(filled,goal);
-    buildBoard(); paintCells(); updateRocket(); save();
+    buildBoard(); paintCells(); updateRocket(); layoutDeck(); save();
     // へらして すでに とどいていたら そのまま おいわいへ
     if(filled>=goal && !launching && running) completeSequence();
   }
@@ -430,8 +432,13 @@
     flame.classList.toggle("lit", filled>0 && !reduceMotion);
     ship.classList.toggle("ready", filled>=goal-1 && filled<goal && !launching && !reduceMotion);
   }
-  function showRocket(){
-    rocket.classList.toggle("hidden", !(running && rocketChk.checked));
+  // すすみぐあいの 表示は ロケットの ゲージか 弁当箱の どちらか 一方だけ 出す。
+  // 両方 出すと おなじ ことを 2か所で 見せることに なるため
+  function showBoards(){
+    const useRocket = running && rocketChk.checked;
+    rocket.classList.toggle("hidden", !useRocket);
+    bento.classList.toggle("hidden", !running || useRocket);
+    layoutDeck();
   }
   // うごき検知の オン／オフを 見た目に 反映する
   function applyDetectMode(){
@@ -456,10 +463,9 @@
       await video.play();
       $("start").classList.add("hidden");
       $("topbar").classList.remove("hidden");
-      bento.classList.remove("hidden");
       biteBtn.classList.remove("hidden");
       running=true; prevGray=null; baseline=0; warm=0;
-      showRocket(); updateRocket(); layoutDeck();
+      showBoards(); updateRocket();
       resize(); loop();
     }catch(e){
       errBox.textContent = (e && e.name==="NotAllowedError")
@@ -583,7 +589,8 @@
     ship.classList.remove("ready");
 
     later(()=>{
-      say("おべんとう かんせい！");
+      // 出している 表示に あわせて 言いかたを かえる
+      say(rocketChk.checked? "ねんりょう まんタン！" : "おべんとう かんせい！");
       fanfare();
       if(voiceOn.checked) speak("ぜんぶ たべられたね、すごい！");
     },600);
@@ -1007,7 +1014,7 @@
   detectOn.addEventListener("change",()=>{ applyDetectMode(); save(); });
   [sndOn,voiceOn].forEach(el=>el.addEventListener("change",save));
   sens.addEventListener("change",save);
-  rocketChk.addEventListener("change",()=>{ showRocket(); save(); });
+  rocketChk.addEventListener("change",()=>{ showBoards(); save(); });
   document.addEventListener("visibilitychange",()=>{ if(document.hidden){ prevGray=null; warm=0; } });
 
   load();
