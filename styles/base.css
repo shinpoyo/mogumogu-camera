@@ -144,9 +144,22 @@ select{
   100%{box-shadow:0 10px 26px rgba(0,0,0,.5), 0 0 0 28px rgba(255,197,61,0)}
 }
 
+/*
+  設定パネルは 下から積み上がるが、テーマによって --deck が大きく変わる
+  （おひめさまは 226px）。高さを 66vh のような固定値にすると、
+  「下の余白 + パネルの高さ」が画面を超えて 上にはみ出し、
+  トップバーの下に潜って操作できなくなる。
+  そこで 下の余白は 30vh で頭打ちにし、高さは「実際に残っている空間」から出す。
+  --panel-gap はトップバーと安全領域のぶんの余白。
+*/
 #panel{
-  position:absolute;left:50%;bottom:calc(var(--deck) + 12px + var(--pad));transform:translateX(-50%);
-  width:min(92vw,460px);max-height:66vh;overflow-y:auto;
+  --panel-gap:78px;
+  --panel-bottom:min(calc(var(--deck) + 12px + var(--pad)), 30vh);
+  position:absolute;left:50%;bottom:var(--panel-bottom);transform:translateX(-50%);
+  width:min(92vw,460px);
+  max-height:calc(100vh - var(--panel-bottom) - var(--panel-gap));
+  max-height:calc(100dvh - var(--panel-bottom) - var(--panel-gap));
+  overflow-y:auto;overscroll-behavior:contain;
   background:rgba(22,32,43,.92);border:1px solid rgba(255,246,230,.16);
   border-radius:var(--radius);padding:14px 16px;display:none;gap:12px;flex-direction:column;
   box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:7;
