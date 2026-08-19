@@ -1,0 +1,207 @@
+/**
+ * テーマごとの見た目。1テーマ = 1セクション。
+ * 増やすときはセクションを丸ごと足すだけでよく、既存のセクションは触らない。
+ */
+
+/* ==================================================================
+   ロケット
+   ================================================================== */
+.tm-rocket{
+  position:absolute;left:12px;bottom:calc(var(--deck) + var(--pad));
+  display:flex;align-items:flex-end;gap:8px;pointer-events:none;
+}
+.rk-gauge{
+  width:26px;height:112px;padding:3px;border-radius:999px;
+  background:rgba(22,32,43,.72);border:1px solid rgba(255,246,230,.22);
+  display:flex;flex-direction:column-reverse;gap:2px;backdrop-filter:blur(6px);
+}
+.rk-seg{flex:1;min-height:4px;border-radius:6px;background:rgba(255,246,230,.12);transition:background .3s ease, box-shadow .3s ease}
+.rk-seg.on{background:linear-gradient(180deg,var(--ume),var(--tamago));box-shadow:0 0 8px rgba(255,197,61,.8)}
+.rk-ship{display:flex;flex-direction:column;align-items:center;transform-origin:50% 100%;transition:opacity .3s ease}
+.rk-ship.gone{opacity:0}
+.rk-body{font-size:42px;line-height:1;display:inline-block;transform:rotate(-45deg);filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+.rk-flame{
+  width:14px;height:0;margin-top:-4px;
+  border-radius:0 0 60% 60% / 0 0 100% 100%;
+  background:linear-gradient(180deg,#FFF6E6,var(--tamago) 45%,var(--ume));
+  filter:blur(.6px);transition:height .35s cubic-bezier(.2,1.6,.4,1);
+}
+.rk-flame.lit{animation:rkFlick .1s infinite alternate}
+@keyframes rkFlick{from{transform:scaleX(1) scaleY(1);opacity:.85}to{transform:scaleX(.75) scaleY(1.2);opacity:1}}
+.rk-ship.ready{animation:rkHop .7s ease-in-out infinite}
+@keyframes rkHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+.tm-rocket-big{
+  position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
+  display:none;pointer-events:none;z-index:4;
+}
+.tm-rocket-big.on{display:block}
+.rk-stack{display:flex;flex-direction:column;align-items:center;transform-origin:50% 100%}
+.rk-bigbody{
+  font-size:clamp(96px,36vmin,260px);line-height:1;display:inline-block;
+  transform:rotate(-45deg);filter:drop-shadow(0 12px 28px rgba(0,0,0,.65));
+}
+.rk-bigflame{
+  width:clamp(26px,9vmin,64px);height:0;margin-top:-10px;
+  border-radius:0 0 55% 55% / 0 0 100% 100%;
+  background:linear-gradient(180deg,#FFFFFF,#FFF6E6 18%,var(--tamago) 50%,var(--ume));
+  filter:blur(1.5px);transition:height .4s cubic-bezier(.2,1.6,.4,1);
+}
+.rk-bigflame.lit{animation:rkBigFlick .08s infinite alternate}
+@keyframes rkBigFlick{from{transform:scaleX(1) scaleY(.94);opacity:.85}to{transform:scaleX(.72) scaleY(1.24);opacity:1}}
+.rk-stack.arrive{animation:rkArrive .7s cubic-bezier(.2,1.5,.35,1)}
+@keyframes rkArrive{
+  0%{transform:translateY(60vh) scale(.25);opacity:0}
+  55%{opacity:1}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+.rk-stack.rev{animation:rkRev .07s linear infinite}
+@keyframes rkRev{
+  0%,100%{transform:translate(0,0)}
+  25%{transform:translate(-4px,2px)}
+  50%{transform:translate(4px,-2px)}
+  75%{transform:translate(-2px,-4px)}
+}
+.rk-stack.blast{animation:rkBlast 1.9s cubic-bezier(.6,0,.9,.35) forwards}
+@keyframes rkBlast{
+  0%{transform:translateY(0) scale(1)}
+  8%{transform:translateY(26px) scale(1.04)}
+  100%{transform:translateY(-160vh) scale(.75)}
+}
+@media (prefers-reduced-motion: reduce){
+  .rk-flame.lit,.rk-bigflame.lit{animation:none}
+  .rk-ship.ready{animation:none}
+  .rk-stack.rev{animation:none}
+  .rk-stack.arrive{animation-duration:.35s}
+  .rk-stack.blast{animation-duration:1s}
+}
+
+/* ==================================================================
+   おべんとう
+   ================================================================== */
+.tm-bento{
+  position:absolute;left:50%;bottom:calc(14px + var(--pad));transform:translateX(-50%);
+  display:grid;grid-template-columns:repeat(6,1fr);gap:6px;
+  padding:8px;border-radius:16px;
+  background:linear-gradient(180deg,#2B1B14,#3A241B);
+  border:3px solid #59392A;box-shadow:0 10px 24px rgba(0,0,0,.45);
+  width:min(92vw,460px);
+}
+.bt-cell{
+  aspect-ratio:1/1;border-radius:10px;background:rgba(255,246,230,.10);
+  display:grid;place-items:center;font-size:clamp(18px,5.5vw,30px);
+  transition:transform .25s ease, background .25s ease;
+}
+.bt-cell.filled{background:var(--rice);transform:scale(1)}
+.bt-cell.pop{animation:btPop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes btPop{0%{transform:scale(.2) rotate(-18deg)}100%{transform:scale(1) rotate(0)}}
+@media (prefers-reduced-motion: reduce){
+  .bt-cell.pop{animation:none}
+}
+
+/* ==================================================================
+   おひめさま
+   ================================================================== */
+.tm-princess{
+  position:absolute;left:50%;bottom:calc(10px + var(--pad));transform:translateX(-50%);
+  width:min(78vw,300px);pointer-events:none;
+}
+.pr-stage{
+  position:relative;height:190px;
+  transition:transform .8s cubic-bezier(.2,1.4,.3,1), top .8s cubic-bezier(.2,1.4,.3,1);
+}
+.pr-stage.rise{
+  position:fixed;left:50%;top:42%;bottom:auto;
+  transform:translate(-50%,-50%) scale(1.55);
+}
+.pr-glow{
+  position:absolute;left:50%;top:50%;width:64%;height:64%;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,197,61,.35),transparent 70%);
+  opacity:0;transition:opacity .6s ease;
+}
+.pr-stage.shine .pr-glow{opacity:1}
+.pr-skirt{
+  position:absolute;left:50%;bottom:8%;width:36%;height:30%;
+  transform:translateX(-50%) scale(1);
+  border-radius:50% 50% 0 0 / 70% 70% 0 0;
+  background:linear-gradient(180deg,#FFD1E6,#FF9FC7);
+  opacity:0;transition:opacity .5s ease, transform .6s cubic-bezier(.2,1.6,.35,1);
+}
+.pr-skirt.bloom{opacity:.9;transform:translateX(-50%) scale(2.1)}
+.pr-figure{
+  position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(1);
+  font-size:56px;line-height:1;text-align:center;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));
+  transition:transform .4s cubic-bezier(.2,1.8,.4,1);
+}
+.pr-figure.pop{animation:prPop .6s cubic-bezier(.2,1.7,.35,1)}
+@keyframes prPop{0%{transform:translate(-50%,-50%) scale(.3) rotate(-10deg)}60%{transform:translate(-50%,-50%) scale(1.25) rotate(4deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(0)}}
+.pr-img{width:1em;height:1em;object-fit:contain;display:inline-block}
+
+.pr-items{position:absolute;inset:0}
+.pr-item{
+  position:absolute;transform:translate(-50%,-50%) scale(.4);
+  font-size:26px;opacity:.18;filter:grayscale(1);
+  transition:opacity .4s ease, transform .4s cubic-bezier(.2,1.7,.35,1), filter .4s ease;
+}
+.pr-item.on{opacity:1;filter:none;transform:translate(-50%,-50%) scale(1)}
+.pr-item.pop{animation:prItemPop .5s cubic-bezier(.2,1.7,.35,1)}
+@keyframes prItemPop{0%{transform:translate(-50%,-50%) scale(1.9)}100%{transform:translate(-50%,-50%) scale(1)}}
+.pr-items.orbit{animation:prOrbit 5s linear infinite}
+@keyframes prOrbit{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.pr-items.orbit .pr-item{animation:prCounter 5s linear infinite}
+@keyframes prCounter{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
+
+@media (prefers-reduced-motion: reduce){
+  .pr-figure.pop,.pr-item.pop{animation:none}
+  .pr-items.orbit,.pr-items.orbit .pr-item{animation:none}
+}
+
+/* ==================================================================
+   パトロール
+   ================================================================== */
+.tm-patrol{
+  position:absolute;left:12px;bottom:calc(var(--deck) + var(--pad));
+  display:flex;align-items:flex-end;gap:8px;pointer-events:none;
+}
+.pt-lamps{
+  width:26px;height:112px;padding:3px;border-radius:999px;
+  background:rgba(22,32,43,.72);border:1px solid rgba(255,246,230,.22);
+  display:flex;flex-direction:column-reverse;gap:2px;backdrop-filter:blur(6px);
+}
+.pt-lamp{flex:1;min-height:4px;border-radius:6px;background:rgba(255,246,230,.12);transition:background .3s ease, box-shadow .3s ease}
+.pt-lamp.on{background:linear-gradient(180deg,var(--sora),var(--edamame));box-shadow:0 0 8px rgba(79,168,224,.8)}
+.pt-lamps.alert .pt-lamp{animation:ptAlert .42s ease-in-out infinite}
+.pt-lamps.alert .pt-lamp:nth-child(odd){animation-delay:.21s}
+@keyframes ptAlert{
+  0%,100%{background:linear-gradient(180deg,var(--ume),#B22)}
+  50%{background:linear-gradient(180deg,var(--sora),#1a5fa0)}
+}
+.pt-hero{font-size:44px;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6));transition:opacity .3s ease}
+.pt-hero.gone{opacity:0}
+.pt-hero.bump{animation:ptBump .38s cubic-bezier(.2,1.7,.35,1)}
+@keyframes ptBump{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(-6deg)}100%{transform:scale(1)}}
+.pt-img{width:1em;height:1em;object-fit:contain;display:inline-block}
+
+.tm-patrol-go{
+  position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
+  display:none;pointer-events:none;z-index:4;
+}
+.tm-patrol-go.on{display:block}
+.pt-goinner{font-size:clamp(72px,26vmin,180px);line-height:1;filter:drop-shadow(0 10px 20px rgba(0,0,0,.6))}
+.pt-goimg{width:1em;height:1em;object-fit:contain;display:inline-block}
+.pt-goinner.arrive{animation:ptArrive .6s cubic-bezier(.2,1.6,.35,1)}
+@keyframes ptArrive{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+.pt-goinner.dash{animation:ptDash 1.7s cubic-bezier(.4,0,.6,1) forwards}
+@keyframes ptDash{
+  0%{transform:translateX(0) scaleX(1)}
+  15%{transform:translateX(0) scaleX(1.15)}
+  100%{transform:translateX(140vw) scaleX(1)}
+}
+@media (prefers-reduced-motion: reduce){
+  .pt-lamps.alert .pt-lamp{animation:none}
+  .pt-hero.bump{animation:none}
+  .pt-goinner.arrive{animation-duration:.3s}
+  .pt-goinner.dash{animation-duration:.9s}
+}

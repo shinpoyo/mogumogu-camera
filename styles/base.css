@@ -1,0 +1,178 @@
+/**
+ * 土台。どのテーマでも共通の見た目（カメラ・わっか・ボタン・パネル・開始画面）。
+ * テーマごとの見た目は themes.css に置く。ここには書かない。
+ */
+:root{
+  --ink:#16202B;
+  --ink-2:#22303F;
+  --rice:#FFF6E6;
+  --tamago:#FFC53D;
+  --ume:#E5484D;
+  --edamame:#79C24A;
+  --sora:#4FA8E0;
+  --radius:22px;
+  --pad:env(safe-area-inset-bottom, 0px);
+  --ring-size:34vmin;          /* わっかの大きさ（JSから変更する） */
+  --deck:118px;                /* 画面したの よけい な高さ。テーマが setDeck() で申告する */
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink);
+  color:var(--rice);
+  font-family:"Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN","Yu Gothic","游ゴシック体",-apple-system,"Segoe UI",Roboto,sans-serif;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+#stage{position:fixed;inset:0;display:grid;place-items:center;background:#0C141C}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0C141C}
+video.mirror{transform:scaleX(-1)}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* ---- わっか（検知範囲） ---- */
+#ring{
+  position:absolute;
+  width:var(--ring-size);height:var(--ring-size);
+  margin:calc(var(--ring-size) / -2) 0 0 calc(var(--ring-size) / -2);
+  border:5px dashed rgba(255,197,61,.9);border-radius:50%;
+  box-shadow:0 0 0 3px rgba(22,32,43,.35) inset, 0 0 24px rgba(255,197,61,.35);
+  touch-action:none;cursor:grab;transition:opacity .25s ease;
+  z-index:1;
+}
+#ring::after{
+  content:"くちに あわせてね（2ほんゆびで おおきさ）";
+  position:absolute;left:50%;top:100%;transform:translate(-50%,8px);
+  font-size:13px;white-space:nowrap;color:var(--tamago);
+  text-shadow:0 2px 6px rgba(0,0,0,.8);
+}
+#ring.hide-label::after{content:""}
+#ring.hit{animation:ringHit .45s ease-out}
+@keyframes ringHit{
+  0%{box-shadow:0 0 0 3px rgba(22,32,43,.35) inset, 0 0 0 0 rgba(255,197,61,.7)}
+  100%{box-shadow:0 0 0 3px rgba(22,32,43,.35) inset, 0 0 0 26px rgba(255,197,61,0)}
+}
+/* うごきを見ない（てどう）モード。hide-label より後に置いて ラベルを 上書きする */
+#ring.off{opacity:.28;border-style:dotted;border-color:rgba(255,246,230,.7);box-shadow:none;animation:none}
+#ring.off::after{content:"てどうモード：みぎしたの「たべた！」で すすみます";color:rgba(255,246,230,.85)}
+
+/* テーマの DOM は ここに 積まれる */
+#themeLayer{position:absolute;inset:0;pointer-events:none}
+
+#shock{
+  position:absolute;left:50%;top:52%;width:22vmin;height:22vmin;
+  margin:-11vmin 0 0 -11vmin;border-radius:50%;
+  border:9px solid rgba(255,197,61,.9);opacity:0;pointer-events:none;z-index:3;
+}
+#shock.on{animation:shock 1s cubic-bezier(.12,.7,.3,1)}
+#shock.on.wide{animation-duration:1.3s}
+@keyframes shock{
+  0%{opacity:.95;transform:scale(.15);border-width:14px}
+  100%{opacity:0;transform:scale(6.5);border-width:2px}
+}
+
+#stage.shake{animation:shake .09s linear infinite}
+@keyframes shake{
+  0%,100%{transform:translate(0,0)}
+  25%{transform:translate(-3px,2px)}
+  50%{transform:translate(3px,-2px)}
+  75%{transform:translate(-2px,-3px)}
+}
+#stage.shake.hard{animation:shakeHard .06s linear infinite}
+@keyframes shakeHard{
+  0%,100%{transform:translate(0,0)}
+  20%{transform:translate(-9px,6px)}
+  40%{transform:translate(8px,-7px)}
+  60%{transform:translate(-7px,-8px)}
+  80%{transform:translate(9px,5px)}
+}
+#flash{position:absolute;inset:0;background:var(--rice);opacity:0;pointer-events:none;z-index:2}
+#flash.on{animation:flash .6s ease-out}
+@keyframes flash{0%{opacity:.62}100%{opacity:0}}
+
+#shout{
+  position:absolute;left:50%;top:12%;transform:translate(-50%,0) scale(.6);
+  font-size:clamp(34px,11vw,72px);font-weight:800;letter-spacing:.04em;
+  color:var(--tamago);text-shadow:0 0 18px rgba(0,0,0,.6),0 6px 0 #C8892A;
+  opacity:0;pointer-events:none;z-index:5;
+}
+#shout.show{animation:shout 1.1s ease-out}
+#shout.count{animation:count .55s ease-out;font-size:clamp(64px,22vw,140px);color:var(--rice)}
+@keyframes shout{
+  0%{opacity:0;transform:translate(-50%,20px) scale(.6)}
+  18%{opacity:1;transform:translate(-50%,0) scale(1.08)}
+  70%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-24px) scale(1)}
+}
+@keyframes count{
+  0%{opacity:0;transform:translate(-50%,0) scale(2.2)}
+  30%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,0) scale(.85)}
+}
+
+/* ---- コントロール ---- */
+#topbar{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;display:flex;gap:8px;align-items:center;z-index:6}
+.badge{
+  background:rgba(22,32,43,.72);border:1px solid rgba(255,246,230,.18);
+  padding:7px 12px;border-radius:999px;font-size:13px;backdrop-filter:blur(6px)
+}
+.spacer{flex:1}
+button{
+  font:inherit;color:var(--rice);background:rgba(22,32,43,.72);
+  border:1px solid rgba(255,246,230,.2);border-radius:999px;padding:10px 14px;
+  backdrop-filter:blur(6px);cursor:pointer;
+}
+button:focus-visible{outline:3px solid var(--sora);outline-offset:2px}
+button.primary{background:var(--tamago);color:#2A1B06;border-color:#C8892A;font-weight:800}
+button.ghost{background:rgba(22,32,43,.55)}
+select{
+  font:inherit;color:var(--rice);background:var(--ink-2);
+  border:1px solid rgba(255,246,230,.2);border-radius:10px;padding:6px 8px;
+}
+
+/* いつでも すぐ押せる「たべた！」ボタン */
+#biteBtn{
+  position:absolute;right:12px;bottom:calc(var(--deck) + var(--pad));
+  width:104px;height:104px;padding:0;border-radius:50%;
+  font-size:19px;font-weight:800;letter-spacing:.02em;z-index:6;
+  box-shadow:0 10px 26px rgba(0,0,0,.5), 0 0 0 6px rgba(255,197,61,.18);
+  touch-action:manipulation;
+}
+#biteBtn:active{transform:scale(.93)}
+#biteBtn.tapped{animation:tapped .4s ease-out}
+@keyframes tapped{
+  0%{box-shadow:0 10px 26px rgba(0,0,0,.5), 0 0 0 0 rgba(255,197,61,.6)}
+  100%{box-shadow:0 10px 26px rgba(0,0,0,.5), 0 0 0 28px rgba(255,197,61,0)}
+}
+
+#panel{
+  position:absolute;left:50%;bottom:calc(var(--deck) + 12px + var(--pad));transform:translateX(-50%);
+  width:min(92vw,460px);max-height:66vh;overflow-y:auto;
+  background:rgba(22,32,43,.92);border:1px solid rgba(255,246,230,.16);
+  border-radius:var(--radius);padding:14px 16px;display:none;gap:12px;flex-direction:column;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:7;
+}
+#panel.open{display:flex}
+.row{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:14px}
+.row label{white-space:nowrap}
+.val{min-width:2.2em;text-align:right;font-weight:800;color:var(--tamago)}
+input[type=range]{flex:1;accent-color:var(--tamago)}
+.hint{font-size:12px;line-height:1.6;color:rgba(255,246,230,.72);white-space:pre-line}
+
+#start{
+  position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(120% 90% at 50% 20%,#22303F,#0C141C);padding:24px;z-index:8;
+}
+#start h1{font-size:clamp(30px,9vw,52px);margin:0 0 6px;color:var(--tamago);letter-spacing:.06em}
+#start p{margin:0 0 22px;line-height:1.8;font-size:15px;color:rgba(255,246,230,.82)}
+#start .big{padding:16px 30px;font-size:18px}
+#err{margin-top:14px;color:var(--ume);font-size:13px;min-height:1em}
+.hidden{display:none !important}
+
+@media (prefers-reduced-motion: reduce){
+  #shout.show{animation-duration:.6s}
+  #ring.hit{animation:none}
+  #stage.shake,#stage.shake.hard{animation:none}
+  #flash.on{animation:none}
+  #shock.on{animation-duration:.5s}
+  #biteBtn.tapped{animation:none}
+}

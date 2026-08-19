@@ -57,9 +57,13 @@
 
 ### 5. setInterval のエミッタは必ず止める
 
-発射中の噴射のように `setInterval` で撒くものは、
-必ず停止タイマーを同時に仕込み、`clearSeq()` とリセット処理の
-両方から止まるようにします。止め忘れると画面外で撒き続けます。
+発射中の噴射のように くり返し撒くものは、必ず `ctx.every(fn, ms, total)` を
+使います。停止タイマーが同時に仕込まれ、リセットとテーマ切り替えの
+両方から `clearTimers()` で止まります。生の `setInterval` は使わないこと。
+止め忘れると画面外で撒き続けます。
+
+同じ理由で、テーマの中の遅延実行は `setTimeout` ではなく
+`ctx.later(fn, ms)` を使います。
 
 ### 6. CSS アニメーションは transform と opacity だけ
 
@@ -86,11 +90,12 @@ window.requestAnimationFrame = (cb) => setTimeout(() => {
   t += 16; const a = performance.now(); cb(t); window.__ft.push(performance.now() - a);
 }, 16);
 
-// 2) いちばん重い場面を通す（例: 完食 → 発射）
+// 2) いちばん重い場面を通す（例: ロケットで完食 → 発射 → 花火）
+window.__mogu.setTheme("rocket");
 window.__mogu.setGoal(3);
 for (let i = 0; i < 3; i++) window.__mogu.onBite();
 
-// 3) 8秒ほど待ってから集計する
+// 3) 12秒ほど待ってから集計する（花火まで含めるため）
 const s = [...window.__ft].sort((a, b) => a - b);
 ({ 平均: window.__ft.reduce((a, b) => a + b, 0) / window.__ft.length,
    p95: s[Math.floor(s.length * .95)], 最大: Math.max(...window.__ft),
@@ -99,7 +104,11 @@ const s = [...window.__ft].sort((a, b) => a - b);
 ```
 
 `window.__mogu` は診断用の窓口です（`parts` / `fxScale` / `frameMs` /
-`setGoal` / `onBite` / `burst` / `exhaust` / `completeSequence`）。
+`theme` / `setTheme` / `setGoal` / `setRingSize` / `onBite` /
+`burst` / `spark` / `blast`）。
+
+**テーマを増やしたら、そのテーマでも必ず測ること。** お祝いの演出は
+テーマごとに違うので、ロケットで足りていても別テーマで破綻しうる。
 
 ## 計測メモ
 
@@ -108,3 +117,6 @@ const s = [...window.__ft].sort((a, b) => a - b);
 - 背景タブでは `setTimeout` も間引かれます。長時間の観測結果は割り引いて見ること。
 - キャンバスのサイズが既定の 300×150 のままだと塗り面積が小さく、
   実際より速い数字が出ます。計測前に全画面サイズにすること。
+- ブラウザの HTTP キャッシュで、編集したはずのモジュールが古いまま
+  配信されることがあります。直したのに直らないときは、別ポートで開くか
+  タブを開き直して確認すること（実際にこれで30分溶かした）。
