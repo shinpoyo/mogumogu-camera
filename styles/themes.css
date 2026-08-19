@@ -108,11 +108,20 @@
 }
 .pr-stage{
   position:relative;height:190px;
-  transition:transform .8s cubic-bezier(.2,1.4,.3,1), top .8s cubic-bezier(.2,1.4,.3,1);
+  transition:transform .8s cubic-bezier(.2,1.4,.3,1);
 }
+/*
+  中央へ持ち上げるのに position:fixed を使ってはいけない。
+  親の .tm-princess が transform を持つため、transform を持つ祖先が
+  fixed の包含ブロックになり、top:42% が「画面の42%」ではなく
+  「親の高さ190pxの42%」と解釈されて、画面の下で見切れる。
+  transform だけで動かせば、この落とし穴を踏まない。
+
+  ステージの中心は画面下端から (10px + pad + 190/2) = 105px + pad。
+  そこを画面の中央(50vh)まで持ち上げる。
+*/
 .pr-stage.rise{
-  position:fixed;left:50%;top:42%;bottom:auto;
-  transform:translate(-50%,-50%) scale(1.55);
+  transform:translateY(calc(-50vh + 105px + var(--pad))) scale(1.55);
 }
 .pr-glow{
   position:absolute;left:50%;top:50%;width:64%;height:64%;

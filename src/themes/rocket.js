@@ -129,9 +129,10 @@ export default {
       ctx.screen.shake(3800, false);
     }, 2100);
 
-    // カウントダウン。ゆっくり数えたほうが「もうすぐだ」が伝わるので 0.9秒おき
+    // カウントダウン。ゆっくり数えたほうが「もうすぐだ」が伝わる。
+    // 0.6 → 0.9 → 1.2秒おきと、実際に見ながら遅くしてきた値。
     const COUNT_AT = 2400;
-    const COUNT_GAP = 900;
+    const COUNT_GAP = 1200;
     ["3", "2", "1"].forEach((t, i) => {
       ctx.later(() => {
         ctx.shout.say(t, true);
@@ -147,7 +148,7 @@ export default {
     });
 
     // ドカーン
-    const LAUNCH = COUNT_AT + 3 * COUNT_GAP + 150;   // 「1」の 1.05秒あと
+    const LAUNCH = COUNT_AT + 3 * COUNT_GAP + 200;   // 「1」の 1.4秒あと
     ctx.later(() => {
       ctx.shout.say("はっしゃ！");
       ctx.speech.speak("ロケット、はっしゃ！");
